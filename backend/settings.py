@@ -17,7 +17,8 @@ SECRET_KEY = 'django-insecure-_zk=9yl=ul!po@_z-)wq&x4=&!(ons2(pogyu52+f7f37v3j$y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['bite-box.edu2skill.online']
+ALLOWED_HOSTS = ['bite-box.bitebox.live','www.bite-box.bitebox.live',]
+# ALLOWED_HOSTS = ['bite-box.edu2skill.online']
 
 
 # Application definition
@@ -39,7 +40,7 @@ INSTALLED_APPS = [
     'customers',
     'channels',
     'tracking',
-    'whitenoise.runserver.nostatic',  # Add this line
+    'whitenoise.runserver_nostatic',  # Add this line
 ]
 
 ASGI_APPLICATION = "backend.asgi.application"
@@ -102,7 +103,7 @@ DATABASES = {
         'NAME': 'bitebox-final',  # The name of your PostgreSQL database
         'USER': 'bitebox_final',      # The PostgreSQL username
         'PASSWORD': 'bitebox-final',  # The PostgreSQL password
-        'HOST': 'bitebox-final.c9mk4iamcldn.eu-north-1.rds.amazonaws.com',   # The host (leave as 'localhost' for local databases)
+        'HOST': 'bitebox-final.cy5we2w0kngu.us-east-1.rds.amazonaws.com',   # The host (leave as 'localhost' for local databases)
         'PORT': '5432',        # The PostgreSQL port (5432 is the default)
     }
 }
@@ -229,5 +230,5 @@ PASSWORD_RESET_TIMEOUT = 60 * 30  # 30 minutes
 CORS_ALLOWED_ORIGINS = [
     # "http://localhost:3000",
     # "http://127.0.0.1:3000",
-    'https://bitebox.edu2skill.online'
+    'https://bitebox.live'
 ]

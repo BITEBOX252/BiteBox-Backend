@@ -19,7 +19,7 @@ urlpatterns = [
     path('seen-notifications/<restaurant_id>/', NotificationseenAPIView.as_view()),
     path('notifications-summary/<restaurant_id>/', NotificationSummaryAPIView.as_view()),
     path('notifications-mark-as-seen/<restaurant_id>/<notification_id>/', NotificationRestaurantMarkAsSeenAPIView.as_view()),
-    path('profile-update/<int:pk>/', RestaurantOwnerProfileUpdateAPIView.as_view()),
+    path('profile-update/<user_id>/', RestaurantOwnerProfileUpdateAPIView.as_view()),
     path('settings-update/<int:pk>/', RestaurantUpdateAPIView.as_view()),
     path('shop/<restaurant_slug>/', RestaurantAPIView.as_view()),
     path('dishes-store/<restaurant_slug>/', RestaurantDishAPIView.as_view()),

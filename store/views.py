@@ -272,6 +272,7 @@ class createOrderAPIView(generics.CreateAPIView):
         city=payload['city']
         cart_id=payload['cart_id']
         user_id=payload['user_id']
+        is_voice_order = payload.get('is_voice_order') == 'true'  # Check voice order flag
         try:
             user=User.objects.get(id=user_id)
         except:
@@ -331,7 +332,16 @@ class createOrderAPIView(generics.CreateAPIView):
         order.total=total_total
 
         order.save()
-        cart_items.delete()
+        # cart_items.delete()
+        if is_voice_order:
+            voice_items = Cart.objects.filter(
+                cart_id=cart_id,
+                  
+            )
+            voice_items.delete()
+        else:
+            # Normal behavior - delete all cart items
+            cart_items.delete()
         return Response({"Message:":"Order created successfully","Order_Id":order.oid},status=status.HTTP_201_CREATED)
     
         

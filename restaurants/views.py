@@ -183,7 +183,7 @@ class OrderDetailAPIView(generics.RetrieveUpdateAPIView):
                 order.save()
 
                 # Create tracking URL
-                tracking_url = f"http://localhost:3000/rider/tracking/{order.oid}/{order.tracking_token}/"
+                tracking_url = f"https://bitebox.live/rider/tracking/{order.oid}/{order.tracking_token}/"
 
                 # Get all active delivery boys
                 restaurant = order.restaurant.first()  # Assuming one restaurant per order
@@ -408,10 +408,20 @@ class NotificationRestaurantMarkAsSeenAPIView(generics.RetrieveAPIView):
     
 
 
+# class RestaurantOwnerProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
+#     queryset=Profile.objects.all()
+#     serializer_class=ProfileSerializer
+#     permission_classes=[AllowAny]
+
 class RestaurantOwnerProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
-    queryset=Profile.objects.all()
-    serializer_class=ProfileSerializer
-    permission_classes=[AllowAny]
+    serializer_class = ProfileSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user_id = self.kwargs['user_id']
+        user = User.objects.get(id=user_id)
+        return Profile.objects.get(user=user)
+
 
 
 class RestaurantUpdateAPIView(generics.RetrieveUpdateAPIView):
@@ -1130,7 +1140,8 @@ nlp = spacy.load("en_core_web_sm")
 
 
 class VoiceOrderView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         command = request.data.get('command', '')
