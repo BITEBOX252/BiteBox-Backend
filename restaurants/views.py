@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from math import radians, sin, cos, sqrt, atan2
 from account.models import User,Profile
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated,AllowAny,IsAuthenticatedOrReadOnly
 from rest_framework.authentication import TokenAuthentication 
 from django.db import models
 from account.serializers import ProfileSerializer
@@ -121,9 +121,9 @@ class DashboardStatAPIView(generics.ListAPIView):
         restaurant=Restaurant.objects.get(id=restaurant_id)
 
         dish_count=Dish.objects.filter(restaurant=restaurant).count()
-        order_count=CartOrder.objects.filter(restaurant=restaurant,payment_status="paid").count()
+        order_count=CartOrder.objects.filter(restaurant=restaurant).count()
         # foriegn key
-        revenue=CartOrderItem.objects.filter(restaurant=restaurant,order__payment_status="paid").aggregate(total_revenue=models.Sum(models.F('sub_total')))['total_revenue'] or 0
+        revenue=CartOrderItem.objects.filter(restaurant=restaurant).aggregate(total_revenue=models.Sum(models.F('sub_total')))['total_revenue'] or 0
 
 
         return [{
@@ -209,74 +209,60 @@ class RevenueAPIView(generics.ListAPIView):
 
 
 
+
 class ReviewListAPIView(generics.ListCreateAPIView):
-    # queryset=Review.objects.all()
-    serializer_class=ReviewSerializer
-    permission_classes=[AllowAny]
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        dish_id=self.kwargs['dish_id']
-        dish=Dish.objects.get(id=dish_id)
-        reviews=Review.objects.filter(dish=dish)
-        return reviews
-    
-    
-    # def create(self,request,*args, **kwargs):
-    #     payload=request.data
+        dish_id = self.kwargs['dish_id']
+        dish = Dish.objects.get(id=dish_id)
+        return Review.objects.filter(dish=dish)
 
-    #     user_id=payload['user_id']
-    #     dish_id=payload['dish_id']
-    #     rating=payload['rating']
-    #     review=payload['review']
 
-    #     user=User.objects.get(id=user_id)
-    #     dish=Dish.objects.get(id=dish_id)
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        print("------------------",request.user)
+    # Get user ID from token if authenticated
+        user_id = request.user.id if request.user.is_authenticated else None
 
-    #     Review.objects.create(
-    #         user=user,
-    #         dish=dish,
-    #         rating=rating,
-    #         review=review
-    #     )
-    #     return Response({"message":"Review Cretaed Successfully"},status=status.HTTP_200_OK)
+    # Check if user has reviewed
+        has_reviewed = False
+        if user_id:
+            has_reviewed = queryset.filter(user_id=user_id).exists()
 
+        return Response({
+        "reviews": serializer.data,
+        "has_reviewed": has_reviewed
+        })
     def create(self, request, *args, **kwargs):
-        payload = request.data
+        if not request.user.is_authenticated:
+            return Response({"error": "Authentication required."}, status=401)
 
-        user_id = payload['user_id']
-        dish_id = payload['dish_id']
-        rating = payload['rating']
-        review_text = payload['review']
+        user = request.user
+        dish_id = request.data.get('dish_id')
+        rating = request.data.get('rating')
+        review_text = request.data.get('review')
 
         try:
-            user = User.objects.get(id=user_id)
             dish = Dish.objects.get(id=dish_id)
 
-            # 🛑 Check if the user already reviewed this dish
             existing_review = Review.objects.filter(user=user, dish=dish).first()
             if existing_review:
-                return Response({"error": "You have already submitted a review for this dish."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "You have already submitted a review for this dish."}, status=400)
 
-            # ✅ If no existing review, create a new one
             Review.objects.create(
                 user=user,
                 dish=dish,
                 rating=rating,
                 review=review_text
             )
-            return Response({"message": "Review Created Successfully"}, status=status.HTTP_201_CREATED)
-
-        except User.DoesNotExist:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": "Review Created Successfully"}, status=201)
         except Dish.DoesNotExist:
-            return Response({"error": "Dish not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Dish not found."}, status=404)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-        
-
-
+            return Response({"error": str(e)}, status=500)
 
 
 class CouponListAPIView(generics.ListAPIView):
@@ -1424,3 +1410,68 @@ def weather_based_nearby_dishes(request):
         "recommended_categories": selected_categories,
         "dishes": serializer.data
     })
+
+
+
+
+# class ReviewListAPIView(generics.ListCreateAPIView):
+#     # queryset=Review.objects.all()
+#     serializer_class=ReviewSerializer
+#     permission_classes=[AllowAny]
+
+#     def get_queryset(self):
+#         dish_id=self.kwargs['dish_id']
+#         dish=Dish.objects.get(id=dish_id)
+#         reviews=Review.objects.filter(dish=dish)
+#         return reviews
+    
+    
+#     # def create(self,request,*args, **kwargs):
+#     #     payload=request.data
+
+#     #     user_id=payload['user_id']
+#     #     dish_id=payload['dish_id']
+#     #     rating=payload['rating']
+#     #     review=payload['review']
+
+#     #     user=User.objects.get(id=user_id)
+#     #     dish=Dish.objects.get(id=dish_id)
+
+#     #     Review.objects.create(
+#     #         user=user,
+#     #         dish=dish,
+#     #         rating=rating,
+#     #         review=review
+#     #     )
+#     #     return Response({"message":"Review Cretaed Successfully"},status=status.HTTP_200_OK)
+#     # def list(self, request, *args, **kwargs):
+#     #     queryset = self.get_queryset()
+#     #     serializer = self.get_serializer(queryset, many=True)
+
+#     #     user_has_reviewed = False
+#     #     if request.user.is_authenticated:
+#     #         user_has_reviewed = queryset.filter(user=request.user).exists()
+
+#     #     return Response({
+#     #     "reviews": serializer.data,
+#     #     "has_reviewed": user_has_reviewed
+#     #     })
+#     def list(self, request, *args, **kwargs):
+#         try:
+#             queryset = self.get_queryset()
+#             serializer = self.get_serializer(queryset, many=True)
+            
+#             response_data = {
+#                 'reviews': serializer.data,
+#                 'count': queryset.count(),
+#                 'has_reviewed': False
+#             }
+
+#             # Only check for authenticated users
+#             if request.user.is_authenticated:
+#                 response_data['has_reviewed'] = queryset.filter(user=request.user).exists()
+
+#             return Response(response_data)
+
+#         except Exception as e:
+#             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

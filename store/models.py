@@ -158,6 +158,7 @@ class Cart(models.Model):
     spice_level=models.CharField(max_length=100,null=True,blank=True)
     cart_id=models.CharField(max_length=100,null=True,blank=True)
     date=models.DateTimeField(auto_now_add=True)
+    is_voice_item = models.BooleanField(default=False)   # NEW
     
     def __str__(self):
         return f"{self.cart_id}-{self.dish.title}"

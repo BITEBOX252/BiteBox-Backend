@@ -137,7 +137,7 @@ class SendPasswordResetEmailView(APIView):
   def post(self, request, format=None):
     serializer = SendPasswordResetEmailSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    return Response({'msg':'Password Reset link send. Please check your Email'}, status=status.HTTP_200_OK)
+    return Response({'msg':'Password Reset link send. Please check your Email,also check spam folder'}, status=status.HTTP_200_OK)
 
 class UserPasswordResetView(APIView):
   renderer_classes = [UserRenderer]

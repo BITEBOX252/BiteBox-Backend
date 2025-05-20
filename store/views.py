@@ -89,8 +89,9 @@ class CartAPIView(generics.ListCreateAPIView):
     permission_classes=[AllowAny]
     def create(self,request,*args, **kwargs):
         portion_size_obj=PortionSize()
-
+        
         payload=request.data
+        is_voice = payload.get('is_voice_item', 'false') == 'true'
         dish_id=payload['dish_id']
         user_id=payload['user_id']
         qty=payload['qty']
@@ -133,6 +134,7 @@ class CartAPIView(generics.ListCreateAPIView):
             cart.user=user
             cart.qty=qty
             cart.price=price 
+            cart.is_voice_item=is_voice
             cart.sub_total=Decimal(price)*int(qty)
             # cart.shipping_amount=Decimal(shipping_amount)*int(qty)
             cart.tax_fee=int(qty) * Decimal(tax_rate)
@@ -154,6 +156,7 @@ class CartAPIView(generics.ListCreateAPIView):
             cart.user=user
             cart.qty=qty
             cart.price=price
+            cart.is_voice_item=is_voice
             cart.sub_total=Decimal(price)*int(qty)
             # cart.shipping_amount=Decimal(shipping_amount)*int(qty)
             cart.tax_fee=int(qty) * Decimal(tax_rate)
@@ -273,6 +276,8 @@ class createOrderAPIView(generics.CreateAPIView):
         cart_id=payload['cart_id']
         user_id=payload['user_id']
         is_voice_order = payload.get('is_voice_order') == 'true'  # Check voice order flag
+        
+        
         try:
             user=User.objects.get(id=user_id)
         except:
@@ -334,14 +339,10 @@ class createOrderAPIView(generics.CreateAPIView):
         order.save()
         # cart_items.delete()
         if is_voice_order:
-            voice_items = Cart.objects.filter(
-                cart_id=cart_id,
-                  
-            )
-            voice_items.delete()
+            Cart.objects.filter(cart_id=cart_id, is_voice_item=True).delete()
         else:
             # Normal behavior - delete all cart items
-            cart_items.delete()
+            Cart.objects.filter(cart_id=cart_id, is_voice_item=False).delete()
         return Response({"Message:":"Order created successfully","Order_Id":order.oid},status=status.HTTP_201_CREATED)
     
         
@@ -384,9 +385,12 @@ class SearchDishAPIView(generics.ListAPIView):
         return R * c
 
     def get_queryset(self):
-        query = self.request.GET.get("query", "")
+        query = self.request.GET.get("query", "").strip()
         user = self.request.user
+        if not query:
+            return Dish.objects.none()
 
+    
         if not user.is_authenticated:
             return Dish.objects.none()  # Or fallback to all published dishes with the query
 
@@ -406,6 +410,7 @@ class SearchDishAPIView(generics.ListAPIView):
             title__icontains=query,
             restaurant__id__in=nearby_restaurant_ids
         )
+    
         
 
 @api_view(['DELETE'])
@@ -426,6 +431,7 @@ class CartAPIViewVoiceOrder(generics.ListCreateAPIView):
         portion_size_obj=PortionSize()
 
         payload=request.data
+        is_voice = payload.get('is_voice_item', 'false') == 'true'
         dish_id=payload['dish_id']
         user_id=payload['user_id']
         qty=payload['qty']
@@ -468,6 +474,7 @@ class CartAPIViewVoiceOrder(generics.ListCreateAPIView):
             cart.user=user
             cart.qty=qty
             cart.price=price 
+            cart.is_voice_item=is_voice
             cart.sub_total=Decimal(price)
             # cart.shipping_amount=Decimal(shipping_amount)*int(qty)
             cart.tax_fee=int(qty) * Decimal(tax_rate)
@@ -489,6 +496,7 @@ class CartAPIViewVoiceOrder(generics.ListCreateAPIView):
             cart.user=user
             cart.qty=qty
             cart.price=price
+            cart.is_voice_item=is_voice
             cart.sub_total=Decimal(price)
             # cart.shipping_amount=Decimal(shipping_amount)*int(qty)
             cart.tax_fee=int(qty) * Decimal(tax_rate)

@@ -15,11 +15,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_zk=9yl=ul!po@_z-)wq&x4=&!(ons2(pogyu52+f7f37v3j$y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['bite-box.bitebox.live','www.bite-box.bitebox.live',]
+# ALLOWED_HOSTS = ['bite-box.bitebox.live','www.bite-box.bitebox.live',]
 # ALLOWED_HOSTS = ['bite-box.edu2skill.online']
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'customers',
     'channels',
     'tracking',
-    'whitenoise.runserver_nostatic',  # Add this line
+    # 'whitenoise.runserver_nostatic',  # Add this line
 ]
 
 ASGI_APPLICATION = "backend.asgi.application"
@@ -65,7 +65,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this line
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this line
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -97,26 +97,26 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bitebox-final',  # The name of your PostgreSQL database
-        'USER': 'bitebox_final',      # The PostgreSQL username
-        'PASSWORD': 'bitebox-final',  # The PostgreSQL password
-        'HOST': 'bitebox-final.cy5we2w0kngu.us-east-1.rds.amazonaws.com',   # The host (leave as 'localhost' for local databases)
-        'PORT': '5432',        # The PostgreSQL port (5432 is the default)
-    }
-}
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'Bitebox',  # The name of your PostgreSQL database
-#         'USER': 'Bitebox',      # The PostgreSQL username
-#         'PASSWORD': 'Bitebox',  # The PostgreSQL password
-#         'HOST': 'localhost',   # The host (leave as 'localhost' for local databases)
+#         'NAME': 'bitebox-final',  # The name of your PostgreSQL database
+#         'USER': 'bitebox_final',      # The PostgreSQL username
+#         'PASSWORD': 'bitebox-final',  # The PostgreSQL password
+#         'HOST': 'bitebox-final.cy5we2w0kngu.us-east-1.rds.amazonaws.com',   # The host (leave as 'localhost' for local databases)
 #         'PORT': '5432',        # The PostgreSQL port (5432 is the default)
 #     }
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Bitebox',  # The name of your PostgreSQL database
+        'USER': 'Bitebox',      # The PostgreSQL username
+        'PASSWORD': 'Bitebox',  # The PostgreSQL password
+        'HOST': 'localhost',   # The host (leave as 'localhost' for local databases)
+        'PORT': '5432',        # The PostgreSQL port (5432 is the default)
+    }
+}
 
 # JWT Configuration
 REST_FRAMEWORK = {
@@ -228,7 +228,7 @@ SIMPLE_JWT = {
 PASSWORD_RESET_TIMEOUT = 60 * 30  # 30 minutes
 
 CORS_ALLOWED_ORIGINS = [
-    # "http://localhost:3000",
-    # "http://127.0.0.1:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     'https://bitebox.live'
 ]
